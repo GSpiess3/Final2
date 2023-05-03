@@ -12,6 +12,86 @@ pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption('DINO GAME')
 
+class Dino:
+
+    def __init__(self):
+        self.width = 44
+        self.height = 44
+        self.x = 10
+        self.y = 80
+        self.texture_num = 0
+        self.dy = 3
+        self.gravity = 1.2
+        self.onground = True
+        self.jumping = False
+        self.jump_stop = 10
+        self.falling = False
+        self.fall_stop = self.y
+        self.set_texture()
+        self.show()
+
+    def update(self, loops):
+        '''
+        resposnible for udating the dino
+        '''
+        #jumping
+        if self.jumping:
+            self.y -= self.dy
+            if self.y <= self.jump_stop:
+                self.fall()
+
+        #falling
+        elif self.falling:
+            self.y += self.gravity * self.dy
+            if self.y >= self.fall_stop:
+                self.stop()
+
+        #walking
+        if self.onground and loops % 4 == 0:
+            self.texture_num = (self.texture_num +1) % 3
+            self.set_texture()
+
+    def show(self):
+        '''
+        responsible for showing the dino
+        '''
+        screen.blit(self.texture, (self.x, self.y))
+
+    def set_texture(self):
+        '''
+        responsible for finding it converting it and making it usable
+        '''
+
+        path = os.path.join(f'assets/images/dino{self.texture_num}.png')
+        self.texture = pygame.image.load(path)
+        self.texture = pygame.transform.scale(self.texture, (self.width, self.height))
+
+    def jump(self):
+        '''
+        used to setting the booleans to the value we need while jumping
+        :return:
+        '''
+        self.jumping = True
+        self.onground = True
+
+    def fall(self):
+        '''
+        booleans while falling
+        :return:
+        '''
+        self.jumping = False
+        self.falling = True
+
+    def stop(self):
+        '''
+        booleans used to put you back on the ground
+        :return:
+        '''
+        self.falling = False
+        self.onground = True
+
+
+
 
 class BackGround:
     '''
@@ -19,7 +99,7 @@ class BackGround:
     Since the dino isn't actually moving we actually move the background on a loop
 
     '''
-    def __init__(self, x):
+    def __init__(self, x, y):
         '''
         :param width: We set the width = to our global width variable
         :param height: We set the height = to out global height variable
@@ -31,7 +111,7 @@ class BackGround:
         self.width = WIDTH
         self.height = HEIGHT
         self.X = x
-        self.Y = 0
+        self.Y = y
         self.set_texture()
         self.show()
 
@@ -64,29 +144,50 @@ class BackGround:
         self.texture = pygame.transform.scale(self.texture, (self.width, self.height))
 
 
-
 class Game:
 
     def __init__(self):
         self.bg = [BackGround(0, 0), BackGround(WIDTH, 0)]
+        self.dino = Dino()
         self.speed = 3
 
 def main():
 
+    #objects
     game = Game()
+    dino = game.dino
+
+    loops = 0
 
     clock = pygame.time.Clock()
 
     while True:
 
+        loops += 1
+
+        #----BG----
         for bg in game.bg:
             bg.update(-game.speed)
             bg.show()
 
+
+        #---Dino---
+        dino.update(loops)
+        dino.show()
+
+
+        #events
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+
+            if event.type == pygame.KEYDOWN:
+
+                if event.key == pygame.K_SPACE:
+                    if dino.onground:
+                        dino.jump()
+
 
         clock.tick(80)
         pygame.display.update()

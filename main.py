@@ -216,6 +216,7 @@ class Score:
             self.sound.play()
 
 
+
 class Game:
 
     def __init__(self, hs=0):

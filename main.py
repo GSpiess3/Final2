@@ -4,12 +4,12 @@ import sys
 import math
 import random
 from typing import Union
-
 import pygame
 from pygame import Surface, SurfaceType
 
 WIDTH = 623
 HEIGHT = 150
+
 
 pygame.init()
 pygame.mixer.init()
@@ -181,16 +181,36 @@ class Collision:
         distance = math.sqrt((obj1.x - obj2.x) ** 2 + (obj1.y - obj2.y) ** 2)
         return distance < 35
 
-
 class Score:
 
-    def __init__(self, hs):
-        self.hs = hs
+    def __init__(self, hs = 0):
+
+        self.hs = self.load_high_score() if hs == 0 else hs
         self.act = 0
         self.font = pygame.font.SysFont('monospace', 18)
         self.color = (0, 0, 0)
         self.set_sound()
         self.show()
+
+    def load_high_score(self):
+        try:
+            with open('score.txt', 'r') as file:
+                content = file.read().strip()
+                if content:
+                    return int(content)
+        except (FileNotFoundError, ValueError):
+            print("File not found error")
+        return 0
+
+    def save_high_score(self, hs):
+        with open('score.txt', 'w') as file:
+            file.write(str(hs))
+
+    def update_high_score(self, current_score):
+        if current_score > self.hs:
+            self.hs = current_score
+            self.save_high_score(self.hs)
+
 
     def update(self, loops):
         self.act = loops // 10
@@ -210,6 +230,7 @@ class Score:
     def check_hs(self):
         if self.act >= self.hs:
             self.hs = self.act
+
 
     def check_sound(self):
         if self.act % 100 == 0 and self.act != 0:
@@ -256,6 +277,7 @@ class Game:
         self.sound.play()
         screen.blit(self.reset_big_lbl, (WIDTH/2 - self.reset_big_lbl.get_width() // 2, HEIGHT // 4))
         screen.blit(self.reset_small_lbl, (WIDTH // 2 - self.reset_small_lbl.get_width() // 2, HEIGHT// 2))
+        self.score.save_high_score(self.score.act)
         self.playing = False
 
     def tospawn(self, loops):
@@ -278,7 +300,8 @@ class Game:
         self.obstactles.append(cactus)
 
     def restart(self):
-        self.__init__(hs = self.score.hs)
+        self.score.save_high_score(self.score.act)
+        self.__init__(hs=self.score.hs)
 
 
 def main():
@@ -321,6 +344,7 @@ def main():
                     over = True
 
             if over:
+                game.score.update_high_score(game.score.act)
                 game.over()
 
             #---Score---

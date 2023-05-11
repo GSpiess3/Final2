@@ -67,7 +67,6 @@ class BackGround:
         self.texture = pygame.image.load(path)
         self.texture = pygame.transform.scale(self.texture, (self.width, self.height))
 
-
 class Dino:
 
     def __init__(self):
@@ -152,7 +151,6 @@ class Dino:
         self.falling = False
         self.onground = True
 
-
 class Cactus:
 
     def __init__(self, x):
@@ -173,7 +171,6 @@ class Cactus:
         path = os.path.join('assets/images/cactus.png')
         self.texture = pygame.image.load(path)
         self.texture = pygame.transform.scale(self.texture, (self.width, self.height))
-
 
 class Collision:
 
@@ -236,8 +233,6 @@ class Score:
         if self.act % 100 == 0 and self.act != 0:
             self.sound.play()
 
-
-
 class Game:
 
     def __init__(self, hs=0):
@@ -284,6 +279,10 @@ class Game:
         return loops % 100 == 0
 
     def spawn_cactus(self):
+        '''
+        will spawn cactus
+        :return:
+        '''
         # list with cactus
         if len(self.obstactles) > 0:
             prev_cactus = self.obstactles[-1]
@@ -300,9 +299,12 @@ class Game:
         self.obstactles.append(cactus)
 
     def restart(self):
+        '''
+        this function will restart the game if the r is hit
+        :return:
+        '''
         self.score.save_high_score(self.score.act)
         self.__init__(hs=self.score.hs)
-
 
 def main():
     # objects
@@ -351,7 +353,7 @@ def main():
             game.score.update(loops)
             game.score.show()
 
-        # events
+        # events and keys
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
